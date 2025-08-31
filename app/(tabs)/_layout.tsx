@@ -3,8 +3,18 @@ import { Home, ShoppingCart, User, Store, Package } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function TabLayout() {
-  const { userProfile } = useAuth();
+  const { userProfile, loading } = useAuth();
   const isVendor = userProfile?.role === 'vendor';
+
+  // Debug logging
+  console.log('TabLayout - userProfile:', userProfile);
+  console.log('TabLayout - isVendor:', isVendor);
+  console.log('TabLayout - loading:', loading);
+
+  // Don't render tabs until user profile is loaded
+  if (loading) {
+    return null;
+  }
 
   return (
     <Tabs
