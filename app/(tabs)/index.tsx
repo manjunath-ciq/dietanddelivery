@@ -190,7 +190,7 @@ export default function Home() {
             <View style={styles.searchContainer}>
               <TouchableOpacity
                 style={styles.searchBar}
-                onPress={() => router.push('/(tabs)/search')}
+                onPress={() => router.push('/search')}
               >
                 <Search size={20} color="#9CA3AF" />
                 <Text style={styles.searchPlaceholder}>
@@ -199,7 +199,7 @@ export default function Home() {
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.filterButton}
-                onPress={() => router.push('/(tabs)/search')}
+                onPress={() => router.push('/search')}
               >
                 <Filter size={20} color="#10B981" />
               </TouchableOpacity>
@@ -253,7 +253,7 @@ export default function Home() {
                 </Text>
                 <TouchableOpacity 
                   style={styles.seeAllButton}
-                  onPress={() => router.push('/(tabs)/search')}
+                  onPress={() => router.push('/search')}
                 >
                   <Text style={styles.seeAllText}>See All</Text>
                   <ArrowRight size={16} color="#10B981" />
