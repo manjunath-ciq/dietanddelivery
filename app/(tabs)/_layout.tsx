@@ -60,7 +60,7 @@ export default function TabLayout() {
             <Package size={size} color={color} strokeWidth={2} />
           ),
         }}
-        href={isVendor ? null : undefined}
+        href={undefined}
       />
       <Tabs.Screen
         name="dashboard"
