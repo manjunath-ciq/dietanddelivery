@@ -9,8 +9,9 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { User, Settings, LogOut, MapPin, Target, Activity } from 'lucide-react-native';
+import { User, Settings, LogOut, MapPin, Target, Activity, Package, Clock, Star, ArrowRight } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
+import { router } from 'expo-router';
 
 const ACTIVITY_LEVELS = [
   { value: 'sedentary', label: 'Sedentary', description: 'Little to no exercise' },
@@ -374,6 +375,31 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {/* Orders Section - Only for customers */}
+        {userProfile?.role === 'customer' && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Package size={20} color="#10B981" />
+              <Text style={styles.sectionTitle}>My Orders</Text>
+            </View>
+            <View style={styles.infoCard}>
+              <TouchableOpacity 
+                style={styles.orderAction}
+                onPress={() => router.push('/(tabs)/orders')}
+              >
+                <View style={styles.orderActionContent}>
+                  <Clock size={20} color="#10B981" />
+                  <View style={styles.orderActionText}>
+                    <Text style={styles.orderActionTitle}>Order History</Text>
+                    <Text style={styles.orderActionSubtitle}>View your past orders and track current ones</Text>
+                  </View>
+                </View>
+                <ArrowRight size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* Sign Out Button */}
         <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
           <LogOut size={20} color="#EF4444" />
@@ -598,5 +624,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#EF4444',
+  },
+  orderAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  orderActionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  orderActionText: {
+    flex: 1,
+  },
+  orderActionTitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: '#1F2937',
+    marginBottom: 2,
+  },
+  orderActionSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
   },
 });
