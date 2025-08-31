@@ -6,6 +6,11 @@ export default function TabLayout() {
   const { userProfile, loading } = useAuth();
   const isVendor = userProfile?.role === 'vendor';
 
+  // Debug logging
+  console.log('TabLayout - userProfile:', userProfile);
+  console.log('TabLayout - isVendor:', isVendor);
+  console.log('TabLayout - loading:', loading);
+
   // Don't render tabs until user profile is loaded
   if (loading) {
     return null;
@@ -42,16 +47,17 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="cart"
-        options={{
-          title: 'Cart',
-          tabBarIcon: ({ size, color }) => (
-            <ShoppingCart size={size} color={color} strokeWidth={2} />
-          ),
-        }}
-        href={isVendor ? null : undefined}
-      />
+      {!isVendor && (
+        <Tabs.Screen
+          name="cart"
+          options={{
+            title: 'Cart',
+            tabBarIcon: ({ size, color }) => (
+              <ShoppingCart size={size} color={color} strokeWidth={2} />
+            ),
+          }}
+        />
+      )}
       <Tabs.Screen
         name="orders"
         options={{
@@ -60,18 +66,18 @@ export default function TabLayout() {
             <Package size={size} color={color} strokeWidth={2} />
           ),
         }}
-        href={undefined}
       />
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ size, color }) => (
-            <Store size={size} color={color} strokeWidth={2} />
-          ),
-        }}
-        href={!isVendor ? null : undefined}
-      />
+      {isVendor && (
+        <Tabs.Screen
+          name="dashboard"
+          options={{
+            title: 'Dashboard',
+            tabBarIcon: ({ size, color }) => (
+              <Store size={size} color={color} strokeWidth={2} />
+            ),
+          }}
+        />
+      )}
       <Tabs.Screen
         name="profile"
         options={{
