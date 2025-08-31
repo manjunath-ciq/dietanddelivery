@@ -66,7 +66,7 @@ export default function SearchScreen() {
     if (advancedFilters.categories.length > 0) count++;
     return count;
   };
-  const { addToCart } = useCart();
+  const { addToCart, removeFromCart, updateQuantity, state: cartState } = useCart();
 
   useEffect(() => {
     fetchFoodItems();
@@ -137,13 +137,21 @@ export default function SearchScreen() {
     console.log('Navigate to food item:', item.name);
   };
 
-  const renderFoodItem = ({ item }: { item: FoodItem }) => (
-    <FoodItemCard
-      item={item}
-      onAddToCart={handleAddToCart}
-      onPress={handleFoodItemPress}
-    />
-  );
+  const renderFoodItem = ({ item }: { item: FoodItem }) => {
+    const cartItem = cartState.items.find(cartItem => cartItem.food_item.id === item.id);
+    const cartQuantity = cartItem ? cartItem.quantity : 0;
+    
+    return (
+      <FoodItemCard
+        item={item}
+        onAddToCart={handleAddToCart}
+        onRemoveFromCart={removeFromCart}
+        onUpdateQuantity={updateQuantity}
+        onPress={handleFoodItemPress}
+        cartQuantity={cartQuantity}
+      />
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>

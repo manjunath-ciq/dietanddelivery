@@ -45,7 +45,7 @@ const FOOD_CATEGORIES = [
 
 export default function Home() {
   const { user, userProfile } = useAuth();
-  const { addToCart, state: cartState } = useCart();
+  const { addToCart, removeFromCart, updateQuantity, state: cartState } = useCart();
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -126,13 +126,21 @@ export default function Home() {
     setSelectedCategory(category);
   };
 
-  const renderFoodItem = ({ item }: { item: FoodItem }) => (
-    <FoodItemCard
-      item={item}
-      onAddToCart={handleAddToCart}
-      onPress={handleFoodItemPress}
-    />
-  );
+  const renderFoodItem = ({ item }: { item: FoodItem }) => {
+    const cartItem = cartState.items.find(cartItem => cartItem.food_item.id === item.id);
+    const cartQuantity = cartItem ? cartItem.quantity : 0;
+    
+    return (
+      <FoodItemCard
+        item={item}
+        onAddToCart={handleAddToCart}
+        onRemoveFromCart={removeFromCart}
+        onUpdateQuantity={updateQuantity}
+        onPress={handleFoodItemPress}
+        cartQuantity={cartQuantity}
+      />
+    );
+  };
 
   if (!user || !userProfile) {
     return null;

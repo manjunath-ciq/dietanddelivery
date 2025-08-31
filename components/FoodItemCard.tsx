@@ -7,7 +7,7 @@ import {
   Image,
   Animated,
 } from 'react-native';
-import { Plus, Clock, Zap, Target, Thermometer, Check } from 'lucide-react-native';
+import { Plus, Minus, Clock, Zap, Target, Thermometer } from 'lucide-react-native';
 
 interface FoodItemCardProps {
   item: {
@@ -23,20 +23,20 @@ interface FoodItemCardProps {
     image_url?: string | null;
   };
   onAddToCart: (item: any) => void;
+  onRemoveFromCart: (itemId: string) => void;
+  onUpdateQuantity: (itemId: string, quantity: number) => void;
   onPress: (item: any) => void;
+  cartQuantity?: number;
 }
 
-export default function FoodItemCard({ item, onAddToCart, onPress }: FoodItemCardProps) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  const handleAddToCart = async () => {
-    setIsAdding(true);
-    await onAddToCart(item);
-    setIsAdding(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 2000);
-  };
+export default function FoodItemCard({ 
+  item, 
+  onAddToCart, 
+  onRemoveFromCart, 
+  onUpdateQuantity, 
+  onPress, 
+  cartQuantity = 0 
+}: FoodItemCardProps) {
 
   const getDietaryIcon = (tag: string) => {
     switch (tag.toLowerCase()) {
@@ -158,24 +158,34 @@ export default function FoodItemCard({ item, onAddToCart, onPress }: FoodItemCar
           </View>
         )}
 
-        {/* Price and Add Button */}
+        {/* Price and Cart Controls */}
         <View style={styles.footer}>
           <Text style={styles.price}>${item.price.toFixed(2)}</Text>
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              showSuccess && styles.successButton,
-              isAdding && styles.loadingButton
-            ]}
-            onPress={handleAddToCart}
-            disabled={isAdding}
-          >
-            {showSuccess ? (
-              <Check size={20} color="#FFFFFF" />
-            ) : (
+          
+          {cartQuantity > 0 ? (
+            <View style={styles.cartControls}>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => onUpdateQuantity(item.id, cartQuantity - 1)}
+              >
+                <Minus size={16} color="#10B981" />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{cartQuantity}</Text>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => onUpdateQuantity(item.id, cartQuantity + 1)}
+              >
+                <Plus size={16} color="#10B981" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => onAddToCart(item)}
+            >
               <Plus size={20} color="#FFFFFF" />
-            )}
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -335,12 +345,32 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  successButton: {
-    backgroundColor: '#059669',
-    shadowColor: '#059669',
+  cartControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#10B981',
   },
-  loadingButton: {
-    backgroundColor: '#6B7280',
-    shadowColor: '#6B7280',
+  quantityButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#10B981',
+  },
+  quantityText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+    color: '#10B981',
+    marginHorizontal: 12,
+    minWidth: 20,
+    textAlign: 'center',
   },
 });
