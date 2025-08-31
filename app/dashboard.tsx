@@ -29,7 +29,7 @@ type Order = Database['public']['Tables']['orders']['Row'] & {
 type FoodItem = Database['public']['Tables']['food_items']['Row'];
 
 export default function VendorDashboard() {
-  const { vendorProfile } = useAuth();
+  const { vendorProfile, userProfile } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [stats, setStats] = useState({
@@ -40,6 +40,20 @@ export default function VendorDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [showKitchenDisplay, setShowKitchenDisplay] = useState(false);
+
+  // Prevent non-vendors from accessing this screen
+  if (!userProfile || userProfile.role !== 'vendor') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.accessDenied}>
+          <Text style={styles.accessDeniedText}>Access Denied</Text>
+          <Text style={styles.accessDeniedSubtext}>
+            This dashboard is only available for vendors.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   useEffect(() => {
     if (vendorProfile) {
@@ -496,5 +510,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
     lineHeight: 20,
+  },
+  accessDenied: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  accessDeniedText: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    color: '#EF4444',
+    marginBottom: 8,
+  },
+  accessDeniedSubtext: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });

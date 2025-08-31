@@ -6,11 +6,6 @@ export default function TabLayout() {
   const { userProfile, loading } = useAuth();
   const isVendor = userProfile?.role === 'vendor';
 
-  // Debug logging
-  console.log('TabLayout - userProfile:', userProfile);
-  console.log('TabLayout - isVendor:', isVendor);
-  console.log('TabLayout - loading:', loading);
-
   // Don't render tabs until user profile is loaded
   if (loading) {
     return null;
