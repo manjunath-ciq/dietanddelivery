@@ -10,6 +10,8 @@ export default function TabLayout() {
   console.log('TabLayout - userProfile:', userProfile);
   console.log('TabLayout - isVendor:', isVendor);
   console.log('TabLayout - loading:', loading);
+  console.log('TabLayout - Will render cart tab:', !isVendor);
+  console.log('TabLayout - Will render dashboard tab:', isVendor);
 
   // Don't render tabs until user profile is loaded
   if (loading) {
