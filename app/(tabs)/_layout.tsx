@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Search, ShoppingCart, User, Store, Package } from 'lucide-react-native';
+import { Home, ShoppingCart, User, Store, Package } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function TabLayout() {
@@ -36,16 +36,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          tabBarIcon: ({ size, color }) => (
-            <Search size={size} color={color} strokeWidth={2} />
-          ),
-        }}
-        href={null}
-      />
+
       <Tabs.Screen
         name="cart"
         options={{
