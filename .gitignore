@@ -47,8 +47,6 @@ yarn-error.*
 *.temp
 
 # Build outputs
-android/
-ios/
 *.apk
 *.aab
 *.ipa
@@ -130,8 +128,7 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# EAS
-.easignore
+
 
 # Local development
 *.local

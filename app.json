@@ -24,14 +24,9 @@
     "experiments": {
       "typedRoutes": true
     },
-    "android": {
-      "package": "com.anonymous.boltexponativewind"
-    },
+
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "d03629e2-5451-4822-b0fe-8c668873ddad"
-      }
+      "router": {}
     }
   }
 }
