@@ -43,8 +43,8 @@ export default function CheckoutScreen() {
         'Delivery Address Required',
         'Please set your delivery address in your profile before placing an order.',
         [
-          { text: 'Cancel', onPress: () => router.back() },
-          { text: 'Set Address', onPress: () => router.push('/profile') },
+          { text: 'Cancel', onPress: () => router.push('/(tabs)') },
+          { text: 'Set Address', onPress: () => router.push('/(tabs)/profile') },
         ]
       );
     }
@@ -135,7 +135,7 @@ export default function CheckoutScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/cart')} style={styles.backButton}>
           <ArrowLeft size={24} color="#1F2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Checkout</Text>
