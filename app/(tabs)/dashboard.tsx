@@ -8,9 +8,10 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, TrendingUp, Clock, DollarSign, Star } from 'lucide-react-native';
+import { Plus, TrendingUp, Clock, DollarSign, Star, Monitor } from 'lucide-react-native';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import KitchenDisplay from '@/components/KitchenDisplay';
 import type { Database } from '@/types/database';
 
 type Order = Database['public']['Tables']['orders']['Row'];
@@ -27,10 +28,46 @@ export default function VendorDashboard() {
     totalItems: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [showKitchenDisplay, setShowKitchenDisplay] = useState(false);
 
   useEffect(() => {
     if (vendorProfile) {
       fetchVendorData();
+      
+      // Set up real-time subscription for new orders
+      const subscription = supabase
+        .channel(`vendor-orders-${vendorProfile.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'orders',
+            filter: `vendor_id=eq.${vendorProfile.id}`,
+          },
+          (payload) => {
+            console.log('New order received:', payload.new);
+            fetchVendorData(); // Refresh data when new order comes in
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+            filter: `vendor_id=eq.${vendorProfile.id}`,
+          },
+          (payload) => {
+            console.log('Order updated:', payload.new);
+            fetchVendorData(); // Refresh data when order is updated
+          }
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
     }
   }, [vendorProfile]);
 
@@ -89,12 +126,10 @@ export default function VendorDashboard() {
 
       if (error) throw error;
 
-      setOrders(prev => 
-        prev.map(order => 
-          order.id === orderId ? { ...order, status: status as any } : order
-        )
-      );
+      // Refresh orders after update
+      fetchVendorData();
     } catch (error) {
+      console.error('Error updating order status:', error);
       Alert.alert('Error', 'Failed to update order status');
     }
   };
@@ -115,6 +150,16 @@ export default function VendorDashboard() {
     }
   };
 
+  // Show kitchen display if enabled
+  if (showKitchenDisplay && vendorProfile) {
+    return (
+      <KitchenDisplay 
+        vendorId={vendorProfile.id} 
+        onBack={() => setShowKitchenDisplay(false)}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -122,9 +167,17 @@ export default function VendorDashboard() {
           <Text style={styles.title}>Dashboard</Text>
           <Text style={styles.businessName}>{vendorProfile?.business_name}</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddMenuItem}>
-          <Plus size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.kitchenButton}
+            onPress={() => setShowKitchenDisplay(true)}
+          >
+            <Monitor size={20} color="#10B981" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addButton} onPress={handleAddMenuItem}>
+            <Plus size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -240,6 +293,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  kitchenButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#F0FDF4',
   },
   title: {
     fontSize: 24,

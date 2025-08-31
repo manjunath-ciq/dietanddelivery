@@ -31,8 +31,7 @@ export default function CartScreen() {
       return;
     }
 
-    // TODO: Navigate to checkout screen
-    Alert.alert('Checkout', 'Checkout functionality will be implemented in Phase 4!');
+    router.push('/checkout');
   };
 
   if (state.items.length === 0) {
