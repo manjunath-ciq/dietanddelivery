@@ -1,8 +1,6 @@
 import { Tabs } from 'expo-router';
-import { Home, ShoppingCart, User, Store } from 'lucide-react-native';
+import { Home, Search, ShoppingCart, User, Store, Package } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { View, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
 
 export default function TabLayout() {
   const { userProfile } = useAuth();
@@ -11,25 +9,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-          borderBottomWidth: 1,
-          borderBottomColor: '#F3F4F6',
-        },
-        headerTitleStyle: {
-          fontSize: 18,
-          fontFamily: 'Inter-Bold',
-          color: '#1F2937',
-        },
-        headerLeft: () => (
-          <TouchableOpacity 
-            onPress={() => router.push('/(tabs)/profile')}
-            style={{ marginLeft: 16 }}
-          >
-            <User size={24} color="#10B981" strokeWidth={2} />
-          </TouchableOpacity>
-        ),
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
@@ -50,11 +30,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Diet & Delivery',
+          title: 'Home',
           tabBarIcon: ({ size, color }) => (
             <Home size={size} color={color} strokeWidth={2} />
           ),
         }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ size, color }) => (
+            <Search size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+        href={null}
       />
       <Tabs.Screen
         name="cart"
@@ -62,6 +52,16 @@ export default function TabLayout() {
           title: 'Cart',
           tabBarIcon: ({ size, color }) => (
             <ShoppingCart size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+        href={isVendor ? null : undefined}
+      />
+      <Tabs.Screen
+        name="orders"
+        options={{
+          title: 'Orders',
+          tabBarIcon: ({ size, color }) => (
+            <Package size={size} color={color} strokeWidth={2} />
           ),
         }}
         href={isVendor ? null : undefined}
@@ -83,7 +83,6 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => (
             <User size={size} color={color} strokeWidth={2} />
           ),
-          headerLeft: () => null, // Remove profile icon from header when on profile tab
         }}
       />
     </Tabs>

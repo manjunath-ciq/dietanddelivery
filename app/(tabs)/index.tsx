@@ -8,9 +8,6 @@ import {
   FlatList,
   Image,
   RefreshControl,
-  Alert,
-  Modal,
-  TextInput,
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,14 +25,12 @@ import {
   Leaf,
   Zap,
   Target,
-  Store,
-  X
+  Store
 } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/lib/supabase';
 import FoodItemCard from '@/components/FoodItemCard';
-import AdvancedFilters from '@/components/AdvancedFilters';
 import type { Database } from '@/types/database';
 
 type FoodItem = Database['public']['Tables']['food_items']['Row'];
@@ -52,26 +47,9 @@ export default function Home() {
   const { user, userProfile } = useAuth();
   const { addToCart, state: cartState } = useCart();
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('trending');
-  const [showSearchModal, setShowSearchModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [advancedFilters, setAdvancedFilters] = useState({
-    dietary: [] as string[],
-    priceRange: [0, 50] as [number, number],
-    maxPrepTime: 60,
-    nutritionalGoals: {
-      maxCalories: 1000,
-      minProtein: 0,
-      maxCarbs: 100,
-      maxFat: 50,
-    },
-    excludeAllergens: [] as string[],
-    categories: [] as string[],
-  });
 
   useEffect(() => {
     if (!user) {
@@ -80,10 +58,6 @@ export default function Home() {
       fetchFoodItems();
     }
   }, [user]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [foodItems, selectedCategory, searchQuery, advancedFilters]);
 
   const fetchFoodItems = async () => {
     try {
@@ -104,96 +78,43 @@ export default function Home() {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...foodItems];
-
-    // Apply category filter
-    switch (selectedCategory) {
-      case 'trending':
-        filtered = filtered.slice(0, 6);
-        break;
-      case 'healthy':
-        filtered = filtered.filter(item => 
-          item.dietary_tags.some(tag => 
-            ['healthy', 'organic', 'low-calorie'].includes(tag.toLowerCase())
-          )
-        );
-        break;
-      case 'protein':
-        filtered = filtered.filter(item => 
-          item.dietary_tags.some(tag => 
-            ['high-protein', 'protein'].includes(tag.toLowerCase())
-          )
-        );
-        break;
-      case 'vegan':
-        filtered = filtered.filter(item => 
-          item.dietary_tags.some(tag => 
-            ['vegan', 'plant-based'].includes(tag.toLowerCase())
-          )
-        );
-        break;
-      case 'quick':
-        filtered = filtered.filter(item => item.prep_time <= 15);
-        break;
-    }
-
-    // Apply search query
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.dietary_tags.some(tag => 
-          tag.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
-    }
-
-    // Apply advanced filters
-    if (advancedFilters.dietary.length > 0) {
-      filtered = filtered.filter(item =>
-        advancedFilters.dietary.some(pref =>
-          item.dietary_tags.some(tag => 
-            tag.toLowerCase().includes(pref.toLowerCase())
-          )
-        )
-      );
-    }
-
-    if (advancedFilters.priceRange[1] < 50) {
-      filtered = filtered.filter(item =>
-        item.price >= advancedFilters.priceRange[0] &&
-        item.price <= advancedFilters.priceRange[1]
-      );
-    }
-
-    if (advancedFilters.nutritionalGoals.maxCalories < 1000) {
-      filtered = filtered.filter(item =>
-        item.nutritional_info?.calories <= advancedFilters.nutritionalGoals.maxCalories
-      );
-    }
-
-    // Note: Allergen filtering removed as allergen_info property doesn't exist in current schema
-
-    setFilteredItems(filtered);
-  };
-
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchFoodItems();
     setRefreshing(false);
   };
 
+  const getFilteredItems = (category: string) => {
+    switch (category) {
+      case 'trending':
+        return foodItems.slice(0, 6); // Show first 6 items
+      case 'healthy':
+        return foodItems.filter(item => 
+          item.dietary_tags.some(tag => 
+            ['healthy', 'organic', 'low-calorie'].includes(tag.toLowerCase())
+          )
+        );
+      case 'protein':
+        return foodItems.filter(item => 
+          item.dietary_tags.some(tag => 
+            ['high-protein', 'protein'].includes(tag.toLowerCase())
+          )
+        );
+      case 'vegan':
+        return foodItems.filter(item => 
+          item.dietary_tags.some(tag => 
+            ['vegan', 'plant-based'].includes(tag.toLowerCase())
+          )
+        );
+      case 'quick':
+        return foodItems.filter(item => item.prep_time <= 15);
+      default:
+        return foodItems;
+    }
+  };
+
   const handleAddToCart = (item: FoodItem) => {
     addToCart(item, 1);
-    Alert.alert(
-      'Added to Cart! 🛒',
-      `${item.name} has been added to your cart.`,
-      [
-        { text: 'Continue Shopping', style: 'default' },
-        { text: 'View Cart', onPress: () => router.push('/(tabs)/cart') }
-      ]
-    );
   };
 
   const handleFoodItemPress = (item: FoodItem) => {
@@ -203,14 +124,6 @@ export default function Home() {
 
   const handleCategoryPress = (category: string) => {
     setSelectedCategory(category);
-  };
-
-  const handleSearchPress = () => {
-    setShowSearchModal(true);
-  };
-
-  const handleFilterPress = () => {
-    setShowFilters(true);
   };
 
   const renderFoodItem = ({ item }: { item: FoodItem }) => (
@@ -226,6 +139,7 @@ export default function Home() {
   }
 
   const isVendor = userProfile.role === 'vendor';
+  const filteredItems = getFilteredItems(selectedCategory);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -252,7 +166,7 @@ export default function Home() {
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.cartButton}
-              onPress={() => router.push('/(tabs)/cart')}
+              onPress={() => router.push('/cart')}
             >
               <View style={styles.cartBadge}>
                 <Text style={styles.cartCount}>{cartState.items.length}</Text>
@@ -268,27 +182,27 @@ export default function Home() {
             <View style={styles.searchContainer}>
               <TouchableOpacity
                 style={styles.searchBar}
-                onPress={handleSearchPress}
+                onPress={() => router.push('/(tabs)/search')}
               >
                 <Search size={20} color="#9CA3AF" />
                 <Text style={styles.searchPlaceholder}>
-                  {searchQuery || 'Search for healthy meals...'}
+                  Search for healthy meals...
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.filterButton}
-                onPress={handleFilterPress}
+                onPress={() => router.push('/(tabs)/search')}
               >
                 <Filter size={20} color="#10B981" />
               </TouchableOpacity>
             </View>
 
             {/* Category Tabs */}
-            <View style={styles.categoryContainer}>
+            <View style={styles.categoriesContainer}>
               <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.categoryScroll}
+                contentContainerStyle={styles.categoriesScroll}
               >
                 {FOOD_CATEGORIES.map((category) => {
                   const IconComponent = category.icon;
@@ -298,18 +212,18 @@ export default function Home() {
                     <TouchableOpacity
                       key={category.key}
                       style={[
-                        styles.categoryChip,
-                        isSelected && styles.categoryChipActive
+                        styles.categoryTab,
+                        isSelected && styles.categoryTabActive
                       ]}
                       onPress={() => handleCategoryPress(category.key)}
                     >
                       <IconComponent 
-                        size={16} 
+                        size={20} 
                         color={isSelected ? '#FFFFFF' : category.color} 
                       />
                       <Text style={[
-                        styles.categoryText,
-                        isSelected && styles.categoryTextActive
+                        styles.categoryLabel,
+                        isSelected && styles.categoryLabelActive
                       ]}>
                         {category.label}
                       </Text>
@@ -319,108 +233,109 @@ export default function Home() {
               </ScrollView>
             </View>
 
-            {/* Food Items */}
-            <View style={styles.foodSection}>
+            {/* Featured Section */}
+            <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>
-                  {selectedCategory === 'trending' ? 'Trending Now' : 
-                   selectedCategory === 'healthy' ? 'Healthy Options' :
-                   selectedCategory === 'protein' ? 'High Protein' :
-                   selectedCategory === 'vegan' ? 'Vegan Delights' :
-                   selectedCategory === 'quick' ? 'Quick Meals' : 'All Items'}
+                  {selectedCategory === 'trending' ? 'Trending Now' :
+                   selectedCategory === 'healthy' ? 'Healthy Choices' :
+                   selectedCategory === 'protein' ? 'Protein Power' :
+                   selectedCategory === 'vegan' ? 'Plant-Based Delights' :
+                   'Quick & Easy'}
                 </Text>
-                <Text style={styles.itemCount}>{filteredItems.length} items</Text>
+                <TouchableOpacity 
+                  style={styles.seeAllButton}
+                  onPress={() => router.push('/(tabs)/search')}
+                >
+                  <Text style={styles.seeAllText}>See All</Text>
+                  <ArrowRight size={16} color="#10B981" />
+                </TouchableOpacity>
               </View>
-              
-              {filteredItems.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyText}>No items found</Text>
-                  <Text style={styles.emptySubtext}>Try adjusting your search or filters</Text>
-                </View>
-              ) : (
+
+              {filteredItems.length > 0 ? (
                 <FlatList
                   data={filteredItems}
                   renderItem={renderFoodItem}
                   keyExtractor={(item) => item.id}
-                  horizontal={false}
                   numColumns={2}
                   columnWrapperStyle={styles.foodGrid}
-                  showsVerticalScrollIndicator={false}
                   scrollEnabled={false}
+                  showsVerticalScrollIndicator={false}
                 />
+              ) : (
+                <View style={styles.emptyState}>
+                  <Leaf size={48} color="#D1D5DB" />
+                  <Text style={styles.emptyText}>No items found in this category</Text>
+                  <Text style={styles.emptySubtext}>Try selecting a different category</Text>
+                </View>
               )}
+            </View>
+
+            {/* Quick Stats */}
+            <View style={styles.statsContainer}>
+              <View style={styles.statCard}>
+                <View style={styles.statIcon}>
+                  <Heart size={20} color="#EF4444" />
+                </View>
+                <View style={styles.statContent}>
+                  <Text style={styles.statNumber}>{foodItems.length}</Text>
+                  <Text style={styles.statLabel}>Healthy Meals</Text>
+                </View>
+              </View>
+              
+              <View style={styles.statCard}>
+                <View style={styles.statIcon}>
+                  <Clock size={20} color="#10B981" />
+                </View>
+                <View style={styles.statContent}>
+                  <Text style={styles.statNumber}>
+                    {foodItems.reduce((acc, item) => acc + item.prep_time, 0) / Math.max(foodItems.length, 1)}m
+                  </Text>
+                  <Text style={styles.statLabel}>Avg Prep Time</Text>
+                </View>
+              </View>
             </View>
           </>
         )}
 
+        {/* Vendor Dashboard */}
         {isVendor && (
-          <View style={styles.vendorMessage}>
-            <Store size={48} color="#10B981" />
-            <Text style={styles.vendorTitle}>Vendor Dashboard</Text>
-            <Text style={styles.vendorSubtitle}>
-              Switch to your dashboard to manage your menu and orders
-            </Text>
+          <View style={styles.vendorDashboard}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Vendor Dashboard</Text>
+            </View>
+            
+            <View style={styles.statsContainer}>
+              <View style={styles.statCard}>
+                <View style={styles.statIcon}>
+                  <Store size={20} color="#10B981" />
+                </View>
+                <View style={styles.statContent}>
+                  <Text style={styles.statNumber}>{foodItems.length}</Text>
+                  <Text style={styles.statLabel}>Menu Items</Text>
+                </View>
+              </View>
+              
+              <View style={styles.statCard}>
+                <View style={styles.statIcon}>
+                  <Star size={20} color="#F59E0B" />
+                </View>
+                <View style={styles.statContent}>
+                  <Text style={styles.statNumber}>4.8</Text>
+                  <Text style={styles.statLabel}>Rating</Text>
+                </View>
+              </View>
+            </View>
+
             <TouchableOpacity 
-              style={styles.dashboardButton}
-              onPress={() => router.push('/(tabs)/dashboard')}
+              style={styles.manageButton}
+              onPress={() => router.push('/dashboard')}
             >
-              <Text style={styles.dashboardButtonText}>Go to Dashboard</Text>
+              <Text style={styles.manageButtonText}>Manage Menu</Text>
             </TouchableOpacity>
           </View>
         )}
       </ScrollView>
-
-      {/* Search Modal */}
-      <Modal
-        visible={showSearchModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowSearchModal(false)}>
-              <X size={24} color="#6B7280" />
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Search</Text>
-            <View style={{ width: 24 }} />
-          </View>
-          
-          <View style={styles.searchInputContainer}>
-            <Search size={20} color="#9CA3AF" />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search for healthy meals..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              autoFocus
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <X size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <FlatList
-            data={filteredItems}
-            renderItem={renderFoodItem}
-            keyExtractor={(item) => item.id}
-            horizontal={false}
-            numColumns={2}
-            columnWrapperStyle={styles.foodGrid}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.searchResults}
-          />
-        </SafeAreaView>
-      </Modal>
-
-      {/* Advanced Filters Modal */}
-      <AdvancedFilters
-        visible={showFilters}
-        currentFilters={advancedFilters}
-        onApplyFilters={setAdvancedFilters}
-        onClose={() => setShowFilters(false)}
-      />
     </SafeAreaView>
   );
 }
@@ -516,15 +431,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#10B981',
   },
-  categoryContainer: {
+  categoriesContainer: {
     backgroundColor: '#FFFFFF',
     paddingVertical: 16,
   },
-  categoryScroll: {
+  categoriesScroll: {
     paddingHorizontal: 20,
     gap: 12,
   },
-  categoryChip: {
+  categoryTab: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
@@ -535,19 +450,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
-  categoryChipActive: {
+  categoryTabActive: {
     backgroundColor: '#10B981',
     borderColor: '#10B981',
   },
-  categoryText: {
+  categoryLabel: {
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: '#6B7280',
   },
-  categoryTextActive: {
+  categoryLabelActive: {
     color: '#FFFFFF',
   },
-  foodSection: {
+  section: {
     marginTop: 24,
     paddingHorizontal: 20,
   },
@@ -562,10 +477,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     color: '#1F2937',
   },
-  itemCount: {
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  seeAllText: {
     fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
+    fontFamily: 'Inter-Medium',
+    color: '#10B981',
   },
   foodGrid: {
     justifyContent: 'space-between',
@@ -587,75 +507,65 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: '#9CA3AF',
   },
-  modalContainer: {
+  statsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 20,
+    marginTop: 24,
+  },
+  statCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    paddingTop: 40,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontFamily: 'Inter-Bold',
-    color: '#1F2937',
-  },
-  searchInputContainer: {
+    padding: 16,
+    borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
     gap: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#1F2937',
-  },
-  searchResults: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  vendorMessage: {
+  statIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F9FAFB',
     alignItems: 'center',
-    paddingVertical: 40,
-    backgroundColor: '#F0FDF4',
+    justifyContent: 'center',
   },
-  vendorTitle: {
-    fontSize: 24,
+  statContent: {
+    flex: 1,
+  },
+  statNumber: {
+    fontSize: 20,
     fontFamily: 'Inter-Bold',
     color: '#1F2937',
-    marginTop: 12,
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  vendorSubtitle: {
-    fontSize: 16,
+  statLabel: {
+    fontSize: 12,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
-    marginBottom: 20,
-    textAlign: 'center',
   },
-  dashboardButton: {
+  vendorDashboard: {
+    marginTop: 24,
+    paddingHorizontal: 20,
+  },
+  manageButton: {
     backgroundColor: '#10B981',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    marginTop: 20,
     shadowColor: '#10B981',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
   },
-  dashboardButtonText: {
+  manageButtonText: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#FFFFFF',

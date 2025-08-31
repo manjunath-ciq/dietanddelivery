@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Image,
+  Animated,
 } from 'react-native';
-import { Plus, Clock, Zap, Target, Thermometer } from 'lucide-react-native';
+import { Plus, Clock, Zap, Target, Thermometer, Check } from 'lucide-react-native';
 
 interface FoodItemCardProps {
   item: {
@@ -26,6 +27,17 @@ interface FoodItemCardProps {
 }
 
 export default function FoodItemCard({ item, onAddToCart, onPress }: FoodItemCardProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleAddToCart = async () => {
+    setIsAdding(true);
+    await onAddToCart(item);
+    setIsAdding(false);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2000);
+  };
+
   const getDietaryIcon = (tag: string) => {
     switch (tag.toLowerCase()) {
       case 'vegan':
@@ -150,10 +162,19 @@ export default function FoodItemCard({ item, onAddToCart, onPress }: FoodItemCar
         <View style={styles.footer}>
           <Text style={styles.price}>${item.price.toFixed(2)}</Text>
           <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => onAddToCart(item)}
+            style={[
+              styles.addButton,
+              showSuccess && styles.successButton,
+              isAdding && styles.loadingButton
+            ]}
+            onPress={handleAddToCart}
+            disabled={isAdding}
           >
-            <Plus size={20} color="#FFFFFF" />
+            {showSuccess ? (
+              <Check size={20} color="#FFFFFF" />
+            ) : (
+              <Plus size={20} color="#FFFFFF" />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -313,5 +334,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
+  },
+  successButton: {
+    backgroundColor: '#059669',
+    shadowColor: '#059669',
+  },
+  loadingButton: {
+    backgroundColor: '#6B7280',
+    shadowColor: '#6B7280',
   },
 });
