@@ -14,7 +14,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import KitchenDisplay from '@/components/KitchenDisplay';
 import type { Database } from '@/types/database';
 
-type Order = Database['public']['Tables']['orders']['Row'];
+type Order = Database['public']['Tables']['orders']['Row'] & {
+  order_items: Array<{
+    id: string;
+    quantity: number;
+    unit_price: number;
+    food_items: {
+      id: string;
+      name: string;
+      image_url: string | null;
+    };
+  }>;
+};
 type FoodItem = Database['public']['Tables']['food_items']['Row'];
 
 export default function VendorDashboard() {
@@ -78,7 +89,19 @@ export default function VendorDashboard() {
       // Fetch recent orders
       const { data: ordersData } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_items (
+            id,
+            quantity,
+            unit_price,
+            food_items (
+              id,
+              name,
+              image_url
+            )
+          )
+        `)
         .eq('vendor_id', vendorProfile.id)
         .order('created_at', { ascending: false })
         .limit(10);

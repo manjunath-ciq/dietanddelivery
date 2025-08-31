@@ -32,7 +32,7 @@ type Order = Database['public']['Tables']['orders']['Row'] & {
     quantity: number;
     unit_price: number;
     special_instructions: string | null;
-    food_item: {
+    food_items: {
       id: string;
       name: string;
       image_url: string | null;
@@ -126,7 +126,7 @@ export default function OrderTrackingScreen() {
             quantity,
             unit_price,
             special_instructions,
-            food_item (
+            food_items (
               id,
               name,
               image_url
@@ -344,7 +344,7 @@ export default function OrderTrackingScreen() {
             {order.order_items.map((item) => (
               <View key={item.id} style={styles.orderItem}>
                 <View style={styles.itemInfo}>
-                  <Text style={styles.itemName}>{item.food_item.name}</Text>
+                  <Text style={styles.itemName}>{item.food_items.name}</Text>
                   <Text style={styles.itemQuantity}>x{item.quantity}</Text>
                   {item.special_instructions && (
                     <Text style={styles.specialInstructions}>

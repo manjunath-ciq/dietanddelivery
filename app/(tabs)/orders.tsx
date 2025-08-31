@@ -28,7 +28,7 @@ type Order = Database['public']['Tables']['orders']['Row'] & {
     id: string;
     quantity: number;
     unit_price: number;
-    food_item: {
+    food_items: {
       id: string;
       name: string;
       image_url: string | null;
@@ -64,7 +64,7 @@ export default function OrdersScreen() {
             id,
             quantity,
             unit_price,
-            food_item (
+            food_items (
               id,
               name,
               image_url
@@ -256,13 +256,13 @@ export default function OrdersScreen() {
                   <View key={item.id} style={styles.itemPreview}>
                     <Image
                       source={{
-                        uri: item.food_item.image_url ||
+                        uri: item.food_items.image_url ||
                           'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=100'
                       }}
                       style={styles.itemImage}
                     />
                     <View style={styles.itemDetails}>
-                      <Text style={styles.itemName}>{item.food_item.name}</Text>
+                      <Text style={styles.itemName}>{item.food_items.name}</Text>
                       <Text style={styles.itemQuantity}>x{item.quantity}</Text>
                     </View>
                   </View>

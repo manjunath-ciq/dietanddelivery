@@ -25,7 +25,7 @@ type Order = Database['public']['Tables']['orders']['Row'] & {
     quantity: number;
     unit_price: number;
     special_instructions: string | null;
-    food_item: {
+    food_items: {
       id: string;
       name: string;
       image_url: string | null;
@@ -80,7 +80,7 @@ export default function KitchenDisplay({ vendorId, onBack }: KitchenDisplayProps
             quantity,
             unit_price,
             special_instructions,
-            food_item (
+            food_items (
               id,
               name,
               image_url
@@ -252,7 +252,7 @@ export default function KitchenDisplay({ vendorId, onBack }: KitchenDisplayProps
                         <View key={item.id} style={styles.orderItem}>
                           <View style={styles.itemInfo}>
                             <Text style={styles.itemName}>
-                              {item.quantity}x {item.food_item.name}
+                              {item.quantity}x {item.food_items.name}
                             </Text>
                             {item.special_instructions && (
                               <Text style={styles.specialInstructions}>
