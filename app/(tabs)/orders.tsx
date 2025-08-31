@@ -34,7 +34,7 @@ type Order = Database['public']['Tables']['orders']['Row'] & {
       image_url: string | null;
     };
   }>;
-  vendor: {
+  vendor_profiles: {
     business_name: string;
     business_address: string;
   };
@@ -70,7 +70,7 @@ export default function OrdersScreen() {
               image_url
             )
           ),
-          vendor (
+          vendor_profiles!vendor_id (
             business_name,
             business_address
           )
@@ -240,12 +240,12 @@ export default function OrdersScreen() {
               {/* Restaurant Info */}
               <View style={styles.restaurantInfo}>
                 <Text style={styles.restaurantName}>
-                  {order.vendor.business_name}
+                  {order.vendor_profiles.business_name}
                 </Text>
                 <View style={styles.restaurantAddress}>
                   <MapPin size={14} color="#6B7280" />
                   <Text style={styles.addressText}>
-                    {order.vendor.business_address}
+                    {order.vendor_profiles.business_address}
                   </Text>
                 </View>
               </View>

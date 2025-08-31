@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { Plus, Clock, Flame, Zap, Target } from 'lucide-react-native';
+import { Plus, Clock, Zap, Target, Thermometer } from 'lucide-react-native';
 
 interface FoodItemCardProps {
   item: {
@@ -123,7 +123,7 @@ export default function FoodItemCard({ item, onAddToCart, onPress }: FoodItemCar
         {/* Nutritional Information */}
         <View style={styles.nutritionContainer}>
           <View style={styles.nutritionItem}>
-            <Flame size={14} color="#EF4444" />
+                            <Thermometer size={14} color="#EF4444" />
             <Text style={styles.nutritionText}>{item.nutritional_info.calories} cal</Text>
           </View>
           <View style={styles.nutritionItem}>

@@ -38,7 +38,7 @@ type Order = Database['public']['Tables']['orders']['Row'] & {
       image_url: string | null;
     };
   }>;
-  vendor: {
+  vendor_profiles: {
     business_name: string;
     business_address: string;
   };
@@ -132,7 +132,7 @@ export default function OrderTrackingScreen() {
               image_url
             )
           ),
-          vendor (
+          vendor_profiles!vendor_id (
             business_name,
             business_address
           )
@@ -323,11 +323,11 @@ export default function OrderTrackingScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Restaurant</Text>
           <View style={styles.restaurantCard}>
-            <Text style={styles.restaurantName}>{order.vendor.business_name}</Text>
+            <Text style={styles.restaurantName}>{order.vendor_profiles.business_name}</Text>
             <View style={styles.restaurantInfo}>
               <MapPin size={16} color="#6B7280" />
               <Text style={styles.restaurantAddress}>
-                {order.vendor.business_address}
+                {order.vendor_profiles.business_address}
               </Text>
             </View>
             <TouchableOpacity style={styles.contactButton}>

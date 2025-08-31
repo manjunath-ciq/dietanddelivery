@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react-native';
+import { Minus, Plus, Trash2, ShoppingBag, Thermometer, Zap, Target, Leaf } from 'lucide-react-native';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -113,7 +113,7 @@ export default function CartScreen() {
         <Text style={styles.nutritionalTitle}>Nutritional Summary</Text>
         <View style={styles.nutritionalGrid}>
           <View style={styles.nutritionalItem}>
-            <Flame size={20} color="#EF4444" />
+            <Thermometer size={20} color="#EF4444" />
             <View style={styles.nutritionalContent}>
               <Text style={styles.nutritionalValue}>
                 {state.nutritionalSummary.totalCalories}
